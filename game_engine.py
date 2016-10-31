@@ -1,6 +1,11 @@
 class Board:
     def __init__(self):
         self.squares = []
+        self.pieces = {
+            PieceType.Black: [],
+            PieceType.White: []
+        }
+
         for row in range(10):
             row = []
 
@@ -8,6 +13,19 @@ class Board:
                 row.append(Square())
 
             self.squares.append(row)
+
+    def add_piece(self, x, y, type):
+        piece = Piece(x, y, type)
+
+        self.squares[y][x] = Square(piece)
+
+        self.pieces[type].append(piece)
+
+    def remove_piece(self, x, y):
+        piece = self.squares[y][x]
+        self.squares[y][x] = Square()
+
+        self.pieces[piece.type].remove(piece)
 
     def init_default_state(self):
         def fill_squares(init_offset, init_row, piece_type):
@@ -17,7 +35,7 @@ class Board:
                     y = piece_y + init_row
                     x = piece_x * 2 + offset
 
-                    self.squares[y][x] = Square(Piece(x, y, piece_type))
+                    self.add_piece(x,y,piece_type)
 
                 if offset == 0:
                     offset = 1
@@ -64,3 +82,4 @@ class Piece:
             return "X"
         else:
             return "O"
+
