@@ -10,20 +10,20 @@ class Board:
             row = []
 
             for column in range(10):
-                row.append(Square())
+                row.append(Square(column, row))
 
             self.squares.append(row)
 
     def add_piece(self, x, y, type):
         piece = Piece(x, y, type)
 
-        self.squares[y][x] = Square(piece)
+        self.squares[y][x].set_piece(piece)
 
         self.pieces[type].append(piece)
 
     def remove_piece(self, x, y):
         piece = self.squares[y][x]
-        self.squares[y][x] = Square()
+        self.squares[y][x].set_piece(None)
 
         self.pieces[piece.type].remove(piece)
 
@@ -35,7 +35,7 @@ class Board:
                     y = piece_y + init_row
                     x = piece_x * 2 + offset
 
-                    self.add_piece(x,y,piece_type)
+                    self.add_piece(x, y, piece_type)
 
                 if offset == 0:
                     offset = 1
@@ -56,12 +56,39 @@ class Board:
 
         return "\n".join(lines)
 
+    def get_square_by_coords(self, x, y):
+        if y < 0 or x < 0 or y >= len(self.squares) or x >= len(self.squares[0]) :
+            return None
+        else:
+            return self.squares[y][x]
+
+    def get_piece_moves(self, piece):
+        moves = []
+
+        def add_close_moves(trying_x, trying_y):
+            trying_square = self.get_square_by_coords(trying_x, trying_y)
+            if trying_square is not None and trying_square.piece is None:
+                moves.append(self.get_square_by_coords(trying_x, trying_y))
+
+        if piece.is_king or piece.type == PieceType.White:
+            add_close_moves(piece.x + 1, piece.y + 1)
+            add_close_moves(piece.x - 1, piece.y + 1)
+
+        if piece.is_king or piece.type == PieceType.Black:
+            add_close_moves(piece.x - 1, piece.y - 1)
+            add_close_moves(piece.x + 1, piece.y - 1)
+
 class PieceType:
     Black = "black"
     White = "white"
 
 class Square:
-    def __init__(self, piece = None):
+    def __init__(self, x, y, piece=None):
+        self.x = x
+        self.y = y
+        self.piece = piece
+
+    def set_piece(self, piece):
         self.piece = piece
 
     def __str__(self):
@@ -72,14 +99,16 @@ class Square:
 
 
 class Piece:
-    def __init__(self, x, y, type):
+    def __init__(self, x, y, type, is_king = False):
         self.x = x
         self.y = y
         self.type = type
+        self.is_king = is_king
 
     def __str__(self):
         if self.type == PieceType.Black:
             return "X"
         else:
             return "O"
+
 
