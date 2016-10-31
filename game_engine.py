@@ -70,6 +70,12 @@ class Board:
             if trying_square is not None and trying_square.piece is None:
                 moves.append(self.get_square_by_coords(trying_x, trying_y))
 
+        def add_jump_moves(op_x, op_y, over_x, over_y, mycol):
+            over_square = self.get_square_by_coords(over_x, over_y)
+            op_square = self.get_square_by_coords(op_x, op_y)
+            if over_square is not None and op_square.piece is not None and op_square.piece.type != mycol:
+                moves.append(self.get_square_by_coords(over_x, over_y))
+
         if piece.is_king or piece.type == PieceType.White:
             add_close_moves(piece.x + 1, piece.y + 1)
             add_close_moves(piece.x - 1, piece.y + 1)
@@ -77,6 +83,14 @@ class Board:
         if piece.is_king or piece.type == PieceType.Black:
             add_close_moves(piece.x - 1, piece.y - 1)
             add_close_moves(piece.x + 1, piece.y - 1)
+
+        if piece.is_king or piece.type == PieceType.White:
+            add_jump_moves(piece.x + 1, piece.y + 1, piece.x + 2, piece.y + 2, piece.type)
+            add_jump_moves(piece.x - 1, piece.y + 1, piece.x - 2, piece.y + 2, piece.type)
+
+        if piece.is_king or piece.type == PieceType.Black:
+            add_jump_moves(piece.x - 1, piece.y - 1, piece.x - 2, piece.y - 2, piece.type)
+            add_jump_moves(piece.x + 1, piece.y - 1, piece.x + 2, piece.y - 2, piece.type)
 
 class PieceType:
     Black = "black"
