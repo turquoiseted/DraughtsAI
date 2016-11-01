@@ -75,7 +75,7 @@ class Board:
                 moves.append(Move(piece.current_square, self.get_square_by_coords(trying_x, trying_y)))
 
         def get_jump_moves(trying_x: int, trying_y: int, direction_x: int, direction_y: int, colour: PieceType):
-            jump_moves = []
+            jump_moves = []  # type: List[Move]
             over_square = self.get_square_by_coords(trying_x + 2*direction_x, trying_y + 2*direction_y)
             op_square = self.get_square_by_coords(trying_x + direction_x, trying_y + direction_y)
 
@@ -114,9 +114,9 @@ class Board:
 
 
 class Move:
-    def __init__(self, origin: Square, dest: Square, capture: Piece = None):
+    def __init__(self, origin: Square, dest: Square, capture:Piece=None):
         if capture is None:
-            self.captures = []
+            self.captures = []  # type: List[Piece]
         else:
             self.captures = [capture]
 
@@ -126,7 +126,6 @@ class Move:
     def add_step(self, new_dest: Square, capture: Piece):
         self.steps.append(new_dest)
         self.captures.append(capture)
-
 
 class PieceType(Enum):
     Black = 0
