@@ -1,3 +1,7 @@
+from typing import List
+from enum import Enum
+
+
 class Board:
     def __init__(self):
         self.squares = []
@@ -14,10 +18,10 @@ class Board:
 
             self.squares.append(row)
 
-    def add_piece(self, x, y, type):
-        piece = Piece(x, y, type)
+    def add_piece(self, square, type):
+        piece = Piece(square, type)
 
-        self.squares[y][x].set_piece(piece)
+        square.set_piece(piece)
 
         self.pieces[type].append(piece)
 
@@ -35,7 +39,7 @@ class Board:
                     y = piece_y + init_row
                     x = piece_x * 2 + offset
 
-                    self.add_piece(x, y, piece_type)
+                    self.add_piece(self.squares[y][x], piece_type)
 
                 if offset == 0:
                     offset = 1
@@ -62,41 +66,71 @@ class Board:
         else:
             return self.squares[y][x]
 
-    def get_piece_moves(self, piece):
+    def get_piece_moves(self, piece: Piece) -> List[Move]:
         moves = []
 
-        def add_close_moves(trying_x, trying_y):
+        def add_close_moves(trying_x: int, trying_y: int):
             trying_square = self.get_square_by_coords(trying_x, trying_y)
             if trying_square is not None and trying_square.piece is None:
-                moves.append(self.get_square_by_coords(trying_x, trying_y))
+                moves.append(Move(piece.current_square, self.get_square_by_coords(trying_x, trying_y)))
 
-        def add_jump_moves(op_x, op_y, over_x, over_y, mycol):
-            over_square = self.get_square_by_coords(over_x, over_y)
-            op_square = self.get_square_by_coords(op_x, op_y)
-            if over_square is not None and op_square.piece is not None and op_square.piece.type != mycol:
-                moves.append(self.get_square_by_coords(over_x, over_y))
+        def get_jump_moves(trying_x: int, trying_y: int, direction_x: int, direction_y: int, colour: PieceType):
+            jump_moves = []
+            over_square = self.get_square_by_coords(trying_x + 2*direction_x, trying_y + 2*direction_y)
+            op_square = self.get_square_by_coords(trying_x + direction_x, trying_y + direction_y)
+
+            if over_square is not None and op_square.piece is not None and op_square.piece.type != colour:
+                jump_moves = get_jump_moves(trying_x + 2*direction_x,
+                                            trying_y + 2*direction_y,
+                                            direction_x,
+                                            direction_y, colour)
+                if len(jump_moves) == 0:
+                    return [Move(piece.current_square, over_square)]
+                else:
+                    # NOTE: this method could be optimised
+                    return [move.add_step(over_square, op_square.piece) for move in jump_moves]
+
+            return jump_moves
+
+        def add_jump_moves(trying_x, trying_y, direction_x, direction_y, colour):
+            jump_moves = get_jump_moves(trying_x, trying_y, direction_x, direction_y, colour)
+            moves.extend(jump_moves)
 
         if piece.is_king or piece.type == PieceType.White:
             add_close_moves(piece.x + 1, piece.y + 1)
             add_close_moves(piece.x - 1, piece.y + 1)
 
+            add_jump_moves(piece.x, piece.y, 1, 1, piece.type)
+            add_jump_moves(piece.x, piece.y, -1, 1, piece.type)
+
         if piece.is_king or piece.type == PieceType.Black:
             add_close_moves(piece.x - 1, piece.y - 1)
             add_close_moves(piece.x + 1, piece.y - 1)
 
-        if piece.is_king or piece.type == PieceType.White:
-            add_jump_moves(piece.x + 1, piece.y + 1, piece.x + 2, piece.y + 2, piece.type)
-            add_jump_moves(piece.x - 1, piece.y + 1, piece.x - 2, piece.y + 2, piece.type)
-
-        if piece.is_king or piece.type == PieceType.Black:
-            add_jump_moves(piece.x - 1, piece.y - 1, piece.x - 2, piece.y - 2, piece.type)
-            add_jump_moves(piece.x + 1, piece.y - 1, piece.x + 2, piece.y - 2, piece.type)
+            add_jump_moves(piece.x, piece.y, -1, -1, piece.type)
+            add_jump_moves(piece.x, piece.y, 1, -1, piece.type)
 
         return moves
 
-class PieceType:
-    Black = "black"
-    White = "white"
+
+class Move:
+    def __init__(self, origin: Square, dest: Square, capture: Piece = None):
+        if capture is None:
+            self.captures = []
+        else:
+            self.captures = [capture]
+
+        self.origin = origin
+        self.steps = [dest]
+
+    def add_step(self, new_dest: Square, capture: Piece):
+        self.steps.append(new_dest)
+        self.captures.append(capture)
+
+
+class PieceType(Enum):
+    Black = 0
+    White = 1
 
 class Square:
     def __init__(self, x, y, piece=None):
@@ -115,11 +149,18 @@ class Square:
 
 
 class Piece:
-    def __init__(self, x, y, type, is_king = False):
-        self.x = x
-        self.y = y
+    def __init__(self, current_square, type, is_king=False):
+        self.current_square = current_square
         self.type = type
         self.is_king = is_king
+
+    @property
+    def x(self):
+        return self.current_square.x
+
+    @property
+    def y(self):
+        return self.current_square.y
 
     def __str__(self):
         if self.type == PieceType.Black:
