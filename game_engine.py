@@ -1,27 +1,19 @@
 from typing import List
 from enum import Enum
 
-class Move:
-    def __init__(self, origin: Square, dest: Square, capture:Piece=None):
-        if capture is None:
-            self.captures = []  # type: List[Piece]
-        else:
-            self.captures = [capture]
-
-        self.origin = origin
-        self.steps = [dest]
-
-    def add_step(self, new_dest: Square, capture: Piece):
-        self.steps.append(new_dest)
-        self.captures.append(capture)
 
 class PieceType(Enum):
     Black = 0
     White = 1
 
 
+class DefaultRepr:
+    def __repr__(self):
+        return "{}({})".format(self.__class__, self.__dict__)
+
+
 class Square:
-    def __init__(self, x, y, piece=None):
+    def __init__(self, x: int, y: int, piece: 'Piece'=None):
         self.x = x
         self.y = y
         self.piece = piece
@@ -29,11 +21,14 @@ class Square:
     def set_piece(self, piece):
         self.piece = piece
 
-    def __str__(self):
+    def get_char_form(self):
         if self.piece is None:
             return "."
         else:
             return str(self.piece)
+
+    def __str__(self):
+        return "Square ({}, {})".format(self.x, self.y)
 
 
 class Piece:
@@ -56,7 +51,26 @@ class Piece:
         else:
             return "O"
 
-class Board:
+
+class Move:
+    def __init__(self, origin: Square, dest: Square, capture:Piece=None):
+        if capture is None:
+            self.captures = []  # type: List[Piece]
+        else:
+            self.captures = [capture]
+
+        self.origin = origin
+        self.steps = [dest]
+
+    def add_step(self, new_dest: Square, capture: Piece):
+        self.steps.append(new_dest)
+        self.captures.append(capture)
+
+    def __str__(self):
+        return " -> ".join([str(sq) for sq in [self.origin] + self.steps])
+
+
+class Board(DefaultRepr):
     def __init__(self):
         self.squares = []
         self.pieces = {
@@ -64,11 +78,11 @@ class Board:
             PieceType.White: []
         }
 
-        for row in range(10):
+        for row_num in range(10):
             row = []
 
-            for column in range(10):
-                row.append(Square(column, row))
+            for column_num in range(10):
+                row.append(Square(column_num, row_num))
 
             self.squares.append(row)
 
@@ -79,11 +93,15 @@ class Board:
 
         self.pieces[type].append(piece)
 
+        return piece
+
     def remove_piece(self, x, y):
         piece = self.squares[y][x]
         self.squares[y][x].set_piece(None)
 
         self.pieces[piece.type].remove(piece)
+
+        return piece
 
     def init_default_state(self):
         def fill_squares(init_offset, init_row, piece_type):
@@ -102,19 +120,19 @@ class Board:
         fill_squares(1, 0, PieceType.White)
         fill_squares(1, 6, PieceType.Black)
 
-    def __str__(self):
+    def get_str_form(self):
         lines = []
 
         for row in self.squares:
             line = ""
             for square in row:
-                line += str(square)
+                line += square.get_char_form()
 
             lines.append(line)
 
         return "\n".join(lines)
 
-    def get_square_by_coords(self, x, y):
+    def get_square_by_coords(self, x, y) -> Square:
         if y < 0 or x < 0 or y >= len(self.squares) or x >= len(self.squares[0]) :
             return None
         else:
@@ -128,41 +146,40 @@ class Board:
             if trying_square is not None and trying_square.piece is None:
                 moves.append(Move(piece.current_square, self.get_square_by_coords(trying_x, trying_y)))
 
-        def get_jump_moves(trying_x: int, trying_y: int, direction_x: int, direction_y: int, colour: PieceType):
-            jump_moves = []  # type: List[Move]
-            over_square = self.get_square_by_coords(trying_x + 2*direction_x, trying_y + 2*direction_y)
-            op_square = self.get_square_by_coords(trying_x + direction_x, trying_y + direction_y)
+        def add_jump_moves(direction_x: int, direction_y: int, colour: PieceType):
+            jump_moves = []
 
-            if over_square is not None and op_square.piece is not None and op_square.piece.type != colour:
-                jump_moves = get_jump_moves(trying_x + 2*direction_x,
-                                            trying_y + 2*direction_y,
-                                            direction_x,
-                                            direction_y, colour)
+            (current_x, current_y) = (piece.x, piece.y)
+
+            over_square = self.get_square_by_coords(current_x + 2*direction_x, current_y + 2*direction_y)
+            op_square = self.get_square_by_coords(current_x + direction_x, current_y + direction_y)
+
+            while over_square is not None and op_square.piece is not None and op_square.piece.type != colour:
                 if len(jump_moves) == 0:
-                    return [Move(piece.current_square, over_square)]
+                    jump_moves.append(Move(piece.current_square, over_square, op_square.piece))
                 else:
-                    # NOTE: this method could be optimised
-                    return [move.add_step(over_square, op_square.piece) for move in jump_moves]
+                    for move in jump_moves:
+                        move.add_step(over_square, op_square)
 
-            return jump_moves
+                (current_x, current_y) = (over_square.x, over_square.y)
 
-        def add_jump_moves(trying_x, trying_y, direction_x, direction_y, colour):
-            jump_moves = get_jump_moves(trying_x, trying_y, direction_x, direction_y, colour)
-            moves.extend(jump_moves)
+                over_square = self.get_square_by_coords(current_x + 2*direction_x, current_y + 2*direction_y)
+                op_square = self.get_square_by_coords(current_x + direction_x, current_y + direction_y)
+
 
         if piece.is_king or piece.type == PieceType.White:
             add_close_moves(piece.x + 1, piece.y + 1)
             add_close_moves(piece.x - 1, piece.y + 1)
 
-            add_jump_moves(piece.x, piece.y, 1, 1, piece.type)
-            add_jump_moves(piece.x, piece.y, -1, 1, piece.type)
+            add_jump_moves(1, 1, piece.type)
+            add_jump_moves(-1, 1, piece.type)
 
         if piece.is_king or piece.type == PieceType.Black:
             add_close_moves(piece.x - 1, piece.y - 1)
             add_close_moves(piece.x + 1, piece.y - 1)
 
-            add_jump_moves(piece.x, piece.y, -1, -1, piece.type)
-            add_jump_moves(piece.x, piece.y, 1, -1, piece.type)
+            add_jump_moves(-1, -1, piece.type)
+            add_jump_moves(1, -1, piece.type)
 
         return moves
 
