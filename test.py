@@ -22,14 +22,26 @@ class TestBoard(TestCase):
         self.assertEqual(self.board.get_str_form(), correct_output)
 
     def test_get_piece_moves(self):
+        # test simple moves
         piece = self.board.add_piece(self.board.squares[0][1], PieceType.White)
-        self.assertSequenceEqual(
-            [move.steps[0] for move in self.board.get_piece_moves(piece)],
-            [
+        self.assertSetEqual(
+            set([move.steps[0] for move in self.board.get_piece_moves(piece)]),
+            {
                 self.board.squares[1][2],
                 self.board.squares[1][0],
-            ]
+            }
         )
+
+        # test jumping moves
+        op_piece = self.board.add_piece(self.board.squares[1][2], PieceType.Black)
+        self.assertSetEqual(
+            set([move.steps[0] for move in self.board.get_piece_moves(piece)]),
+            {
+                self.board.squares[2][3],
+                self.board.squares[1][0]
+            }
+        )
+
 
 
 if __name__ == "__main__":
