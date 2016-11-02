@@ -12,7 +12,7 @@ class DefaultRepr:
         return "{}({})".format(self.__class__, self.__dict__)
 
 
-class Square:
+class Square(DefaultRepr):
     def __init__(self, x: int, y: int, piece: 'Piece'=None):
         self.x = x
         self.y = y
@@ -31,7 +31,7 @@ class Square:
         return "Square ({}, {})".format(self.x, self.y)
 
 
-class Piece:
+class Piece(DefaultRepr):
     def __init__(self, current_square, type, is_king=False):
         self.current_square = current_square
         self.type = type
@@ -86,8 +86,8 @@ class Board(DefaultRepr):
 
             self.squares.append(row)
 
-    def add_piece(self, square, type):
-        piece = Piece(square, type)
+    def add_piece(self, square, type, is_king=False):
+        piece = Piece(square, type, is_king)
 
         square.set_piece(piece)
 
@@ -146,7 +146,7 @@ class Board(DefaultRepr):
             if trying_square is not None and trying_square.piece is None:
                 moves.append(Move(piece.current_square, self.get_square_by_coords(trying_x, trying_y)))
 
-        def add_jump_moves(direction_x: int, direction_y: int, colour: PieceType):
+        def add_jump_moves(direction_x: int, direction_y: int):
             jump_moves = []
 
             (current_x, current_y) = (piece.x, piece.y)
@@ -154,7 +154,12 @@ class Board(DefaultRepr):
             over_square = self.get_square_by_coords(current_x + 2*direction_x, current_y + 2*direction_y)
             op_square = self.get_square_by_coords(current_x + direction_x, current_y + direction_y)
 
-            while over_square is not None and op_square.piece is not None and op_square.piece.type != colour:
+            print(over_square, op_square, repr(op_square.piece))
+            while       over_square is not None\
+                    and op_square is not None\
+                    and over_square.piece is None \
+                    and op_square.piece is not None \
+                    and op_square.piece.type != piece.type:
                 if len(jump_moves) == 0:
                     jump_moves.append(Move(piece.current_square, over_square, op_square.piece))
                 else:
@@ -171,15 +176,15 @@ class Board(DefaultRepr):
             add_close_moves(piece.x + 1, piece.y + 1)
             add_close_moves(piece.x - 1, piece.y + 1)
 
-            add_jump_moves(1, 1, piece.type)
-            add_jump_moves(-1, 1, piece.type)
+            add_jump_moves(1, 1)
+            add_jump_moves(-1, 1)
 
         if piece.is_king or piece.type == PieceType.Black:
             add_close_moves(piece.x - 1, piece.y - 1)
             add_close_moves(piece.x + 1, piece.y - 1)
 
-            add_jump_moves(-1, -1, piece.type)
-            add_jump_moves(1, -1, piece.type)
+            add_jump_moves(-1, -1)
+            add_jump_moves(1, -1)
 
         return moves
 
