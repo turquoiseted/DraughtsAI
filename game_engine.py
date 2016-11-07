@@ -53,18 +53,31 @@ class Piece(DefaultRepr):
 
 
 class Move:
-    def __init__(self, origin: Square, dest: Square, capture:Piece=None):
-        if capture is None:
+    def __init__(self, origin: Piece, steps: Union[Square, List[Square]], captures: Union[Piece, List[Piece]] = None):
+        if captures is None:
             self.captures = []  # type: List[Piece]
+        elif isinstance(captures, list):
+            self.captures = captures
         else:
-            self.captures = [capture]
+            self.captures = [captures]
 
         self.origin = origin
-        self.steps = [dest]
+
+        if isinstance(steps, list):
+            self.steps = steps
+        else:
+            self.steps = [steps]
+
+    def clone(self):
+        return Move(self.origin, self.steps, self.captures)
 
     def add_step(self, new_dest: Square, capture: Piece):
         self.steps.append(new_dest)
         self.captures.append(capture)
+
+    @property
+    def dest(self):
+        return self.steps[-1]
 
     def __str__(self):
         return " -> ".join([str(sq) for sq in [self.origin] + self.steps])
