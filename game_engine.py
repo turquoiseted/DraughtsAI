@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from enum import Enum
 
 
@@ -13,7 +13,7 @@ class DefaultRepr:
 
 
 class Square(DefaultRepr):
-    def __init__(self, x: int, y: int, piece: 'Piece'=None):
+    def __init__(self, x: int, y: int, piece: 'Piece' = None):
         self.x = x
         self.y = y
         self.piece = piece
@@ -32,7 +32,7 @@ class Square(DefaultRepr):
 
 
 class Piece(DefaultRepr):
-    def __init__(self, current_square, type, is_king=False):
+    def __init__(self, current_square: Square, type: PieceType, is_king=False):
         self.current_square = current_square
         self.type = type
         self.is_king = is_king
