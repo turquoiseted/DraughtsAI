@@ -41,7 +41,7 @@ class Board:
                     offset = 1
                 else:
                     offset = 0
-        fill_squares(0, 0, PieceType.White)
+        fill_squares(1, 0, PieceType.White)
         fill_squares(1, 6, PieceType.Black)
 
     def __str__(self):
@@ -91,6 +91,8 @@ class Board:
         if piece.is_king or piece.type == PieceType.Black:
             add_jump_moves(piece.x - 1, piece.y - 1, piece.x - 2, piece.y - 2, piece.type)
             add_jump_moves(piece.x + 1, piece.y - 1, piece.x + 2, piece.y - 2, piece.type)
+
+        return moves
 
 class PieceType:
     Black = "black"
