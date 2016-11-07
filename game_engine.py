@@ -157,33 +157,33 @@ class Board(DefaultRepr):
         def add_close_moves(trying_x: int, trying_y: int):
             trying_square = self.get_square_by_coords(trying_x, trying_y)
             if trying_square is not None and trying_square.piece is None:
-                moves.append(Move(piece.current_square, self.get_square_by_coords(trying_x, trying_y)))
+                moves.append(Move(piece, self.get_square_by_coords(trying_x, trying_y)))
 
         def add_jump_moves(direction_x: int, direction_y: int):
-            jump_moves = []
+            jump_moves = []  # type: List[Move]
 
             (current_x, current_y) = (piece.x, piece.y)
 
-            over_square = self.get_square_by_coords(current_x + 2*direction_x, current_y + 2*direction_y)
+            over_square = self.get_square_by_coords(current_x + 2 * direction_x, current_y + 2 * direction_y)
             op_square = self.get_square_by_coords(current_x + direction_x, current_y + direction_y)
 
             print(over_square, op_square, repr(op_square.piece))
-            while       over_square is not None\
-                    and op_square is not None\
+            while over_square is not None \
+                    and op_square is not None \
                     and over_square.piece is None \
                     and op_square.piece is not None \
                     and op_square.piece.type != piece.type:
                 if len(jump_moves) == 0:
-                    jump_moves.append(Move(piece.current_square, over_square, op_square.piece))
+                    jump_moves.append(Move(piece, over_square, op_square.piece))
                 else:
-                    for move in jump_moves:
-                        move.add_step(over_square, op_square)
+                    move = jump_moves[-1].clone()
+                    move.add_step(over_square, op_square.piece)
+                    jump_moves.append(move)
 
                 (current_x, current_y) = (over_square.x, over_square.y)
 
-                over_square = self.get_square_by_coords(current_x + 2*direction_x, current_y + 2*direction_y)
+                over_square = self.get_square_by_coords(current_x + 2 * direction_x, current_y + 2 * direction_y)
                 op_square = self.get_square_by_coords(current_x + direction_x, current_y + direction_y)
-
 
         if piece.is_king or piece.type == PieceType.White:
             add_close_moves(piece.x + 1, piece.y + 1)
