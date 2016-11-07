@@ -130,7 +130,7 @@ class Board(DefaultRepr):
                     offset = 1
                 else:
                     offset = 0
-        fill_squares(1, 0, PieceType.White)
+        fill_squares(0, 0, PieceType.White)
         fill_squares(1, 6, PieceType.Black)
 
     def get_str_form(self):
@@ -146,10 +146,15 @@ class Board(DefaultRepr):
         return "\n".join(lines)
 
     def get_square_by_coords(self, x, y) -> Square:
-        if y < 0 or x < 0 or y >= len(self.squares) or x >= len(self.squares[0]) :
+        if y < 0 or x < 0 or y >= len(self.squares) or x >= len(self.squares[0]):
             return None
         else:
             return self.squares[y][x]
+
+    def apply_move(self, move: Move):
+        move.origin.current_square.piece = None
+        move.origin.current_square = move.dest
+        move.dest.piece = move.origin
 
     def get_piece_moves(self, piece: Piece) -> List[Move]:
         moves = []
@@ -200,4 +205,3 @@ class Board(DefaultRepr):
             add_jump_moves(1, -1)
 
         return moves
-
