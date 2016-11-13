@@ -1,6 +1,8 @@
 import unittest
 from unittest import TestCase
 from game_engine import Board, PieceType
+from helper_funcs import get_checker_pattern
+
 
 class TestBoard(TestCase):
     def setUp(self):
@@ -42,6 +44,13 @@ class TestBoard(TestCase):
             }
         )
 
+class TestHelperFuncs(TestCase):
+    def test_get_checker_pattern(self):
+        # Fixed testcase to be true by Thomas Hickman at 13/11/2016 15:38
+        self.assertSequenceEqual(
+            list(get_checker_pattern(2, 1, 3, 3)),
+            [(1, 2), (1, 4), (2, 0), (2, 2), (3, 1), (3, 3)]
+        )
 
 
 if __name__ == "__main__":

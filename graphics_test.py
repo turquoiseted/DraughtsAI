@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 
+from helper_funcs import get_checker_pattern
+
 lastx, lasty = 0, 0
 
 def xy(event):
@@ -32,7 +34,15 @@ move.grid(row = 0, column = 0, sticky = (S, E), pady = 60, padx = 60)
 
 
 
+def draw_board():
+    def create_rect_at_pos(row, col, fill):
+        canvas.create_rectangle((row * 40 + 10, col * 40 + 10, row * 40 + 50, col * 40 + 50), fill=fill)
 
+    for (row, col) in get_checker_pattern(init_offset=0, init_row=0, rows=10, max_col=10):
+        create_rect_at_pos(row, col, "brown")
+
+    for (row, col) in get_checker_pattern(init_offset=1, init_row=0, rows=10, max_col=10):
+        create_rect_at_pos(row, col, "orange")
 
 def create_board():
     canvas.create_text((600, 50), text = "Draughts", font = ("Edwardian Script ITC", 60))
@@ -41,74 +51,7 @@ def create_board():
     canvas.create_text((480, 350), text = "Enter Move", font = ("Times new roman", 16))
     canvas.create_rectangle((10, 10, 410, 410), fill = "lightgoldenrod")
 
-    
-    
-    
-    # Rows 1&2
-    canvas.create_rectangle((10, 10, 50, 50), fill = "brown")
-    canvas.create_rectangle((90, 10, 130, 50), fill = "brown")
-    canvas.create_rectangle((50, 50, 90, 90), fill = "brown")
-    canvas.create_rectangle((130, 50, 170, 90), fill = "brown")
-    canvas.create_rectangle((170, 10, 210, 50), fill = "brown")
-    canvas.create_rectangle((210, 50, 250, 90), fill = "brown")
-    canvas.create_rectangle((250, 10, 290, 50), fill = "brown")
-    canvas.create_rectangle((290, 50, 330, 90), fill = "brown")
-    canvas.create_rectangle((330, 10, 370, 50), fill = "brown")
-    canvas.create_rectangle((370, 50, 410, 90), fill = "brown")
-
-    # Rows 3&4
-    canvas.create_rectangle((10, 90, 50, 130), fill = "brown")
-    canvas.create_rectangle((90, 90, 130, 130), fill = "brown")
-    canvas.create_rectangle((50, 130, 90, 170), fill = "brown")
-    canvas.create_rectangle((130, 130, 170, 170), fill = "brown")
-    canvas.create_rectangle((170, 90, 210, 130), fill = "brown")
-    canvas.create_rectangle((210, 130, 250, 170), fill = "brown")
-    canvas.create_rectangle((250, 90, 290, 130), fill = "brown")
-    canvas.create_rectangle((290, 130, 330, 170), fill = "brown")
-    canvas.create_rectangle((330, 90, 370, 130), fill = "brown")
-    canvas.create_rectangle((370, 130, 410, 170), fill = "brown")
-
-    # Rows 5&6
-    canvas.create_rectangle((10, 170, 50, 210), fill = "brown")
-    canvas.create_rectangle((90, 170, 130, 210), fill = "brown")
-    canvas.create_rectangle((50, 210, 90, 250), fill = "brown")
-    canvas.create_rectangle((130, 210, 170, 250), fill = "brown")
-    canvas.create_rectangle((170, 170, 210, 210), fill = "brown")
-    canvas.create_rectangle((210, 210, 250, 250), fill = "brown")
-    canvas.create_rectangle((250, 170, 290, 210), fill = "brown")
-    canvas.create_rectangle((290, 210, 330, 250), fill = "brown")
-    canvas.create_rectangle((330, 170, 370, 210), fill = "brown")
-    canvas.create_rectangle((370, 210, 410, 250), fill = "brown")
-
-    # Row 7&8
-    canvas.create_rectangle((10, 250, 50, 290), fill = "brown")
-    canvas.create_rectangle((90, 250, 130, 290), fill = "brown")
-    canvas.create_rectangle((50, 290, 90, 330), fill = "brown")
-    canvas.create_rectangle((130, 290, 170, 330), fill = "brown")
-    canvas.create_rectangle((170, 250, 210, 290), fill = "brown")
-    canvas.create_rectangle((210, 290, 250, 330), fill = "brown")
-    canvas.create_rectangle((250, 250, 290, 290), fill = "brown")
-    canvas.create_rectangle((290, 290, 330, 330), fill = "brown")
-    canvas.create_rectangle((330, 250, 370, 290), fill = "brown")
-    canvas.create_rectangle((370, 290, 410, 330), fill = "brown")
-
-    # Rows 9&10
-    canvas.create_rectangle((10, 330, 50, 370), fill = "brown")
-    canvas.create_rectangle((90, 330, 130, 370), fill = "brown")
-    canvas.create_rectangle((50, 370, 90, 410), fill = "brown")
-    canvas.create_rectangle((130, 370, 170, 410), fill = "brown")
-    canvas.create_rectangle((170, 330, 210, 370), fill = "brown")
-    canvas.create_rectangle((210, 370, 250, 410), fill = "brown")
-    canvas.create_rectangle((250, 330, 290, 370), fill = "brown")
-    canvas.create_rectangle((290, 370, 330, 410), fill = "brown")
-    canvas.create_rectangle((330, 330, 370, 370), fill = "brown")
-    canvas.create_rectangle((370, 370, 410, 410), fill = "brown")
-
-    #Border
-    canvas.create_line(10, 10, 410, 10, fill='black', width=1)
-    canvas.create_line(10, 10, 10, 410, fill='black', width=1)
-    canvas.create_line(410, 10, 410, 410, fill='black', width=1)
-    canvas.create_line(10, 410, 410, 410, fill='black', width=1)
+    draw_board()
 
 def set_pieces_black():
     #Row 4
@@ -117,7 +60,7 @@ def set_pieces_black():
     canvas.create_oval((215, 375, 245, 405), fill = "black")
     canvas.create_oval((295, 375, 325, 405), fill = "black")
     canvas.create_oval((375, 375, 405, 405), fill = "black")
-    
+
     #Row 3
     canvas.create_oval((15, 335, 45, 365), fill = "black")
     canvas.create_oval((95, 335, 125, 365), fill = "black")
@@ -146,7 +89,7 @@ def set_pieces_white():
     canvas.create_oval((215, 135, 245, 165), fill = "white")
     canvas.create_oval((295, 135, 325, 165), fill = "white")
     canvas.create_oval((375, 135, 405, 165), fill = "white")
-    
+
     #Row 2
     canvas.create_oval((15, 95, 45, 125), fill = "white")
     canvas.create_oval((95, 95, 125, 125), fill = "white")
@@ -171,7 +114,4 @@ def set_pieces_white():
 
 
 create_board()
-set_pieces_black()
-set_pieces_white()
-
-#root.mainloop()
+root.mainloop()
