@@ -128,7 +128,7 @@ class Board(DefaultRepr):
                 self.add_piece(self.squares[col][row], piece_type)
 
         fill_squares(0, 0, PieceType.White)
-        fill_squares(1, 6, PieceType.Black)
+        fill_squares(0, 6, PieceType.Black)
 
     def get_str_form(self):
         lines = []
