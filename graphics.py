@@ -17,7 +17,7 @@ class DraughtsUI:
         self._canvas.grid(column=0, row=0, sticky=(N, W, E, S))
         self._canvas.config(background="lemon chiffon")
 
-        self._pieces = {
+        self._pieces_by_type = {
             PieceType.White: [],  # type: List[int]
             PieceType.Black: []  # type: List[int]
         }
@@ -27,10 +27,12 @@ class DraughtsUI:
         # moveTextBox.place(x=10, y=10, width=100)
         moveTextBox.grid(row=0, column=0, sticky=(S, E), pady=60, padx=60)
 
-        moveButton = None  # TODO: add a button and receive input
-
         self._draw_main_ui()
         #self.set_pieces_black()
+
+    @property
+    def _all_pieces(self):
+        return self._pieces_by_type[PieceType.White] + self._pieces_by_type[PieceType.Black]
 
     def launch(self):
         self._root.mainloop()
@@ -41,11 +43,15 @@ class DraughtsUI:
         """
         raise NotImplementedError()
 
+    def clear_board(self):
+        for ui_piece in self._all_pieces:
+            self._canvas.delete(ui_piece)
+
     def draw_board(self, board: Board):
         """
         Renders piece_by_type from a board from a blank ui state
         """
-        for piece in board.piece_by_type[PieceType.Black] + board.piece_by_type[PieceType.White]:
+        for piece in board.all_pieces:
             self.draw_piece(piece)
 
     def draw_piece(self, piece: Piece):
@@ -55,7 +61,7 @@ class DraughtsUI:
         oval = self._canvas.create_oval(self._get_board_to_ui_coords(piece.x, piece.y),
                                         fill="black" if piece.type == PieceType.Black else "white")
 
-        self._pieces[piece.type].append(oval)
+        self._pieces_by_type[piece.type].append(oval)
 
     def _on_text_move_entered(self):
         # parse in a board class/another class, apply as a move
