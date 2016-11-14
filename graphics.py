@@ -24,6 +24,15 @@ class DraughtsUI:
         self.root.mainloop()
 
     def draw_board(self):
+    def draw_move(self, move: Move):
+        """
+        Applies the specified move
+        """
+        pass
+
+    def _on_text_move_entered(self):
+        # parse in a board class/another class, apply as a move
+        pass
         def create_rect_at_pos(row, col, fill):
             self.canvas.create_rectangle((row * 40 + 10, col * 40 + 10, row * 40 + 50, col * 40 + 50), fill=fill)
 
