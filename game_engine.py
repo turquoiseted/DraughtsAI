@@ -88,7 +88,7 @@ class Move:
 class Board(DefaultRepr):
     def __init__(self):
         self.squares = []
-        self.pieces = {
+        self.piece_by_type = {
             PieceType.Black: [],
             PieceType.White: []
         }
@@ -101,12 +101,16 @@ class Board(DefaultRepr):
 
             self.squares.append(row)
 
+    @property
+    def all_pieces(self):
+        return self.piece_by_type[PieceType.Black] + self.piece_by_type[PieceType.White]
+
     def add_piece(self, square, type, is_king=False):
         piece = Piece(square, type, is_king)
 
         square.set_piece(piece)
 
-        self.pieces[type].append(piece)
+        self.piece_by_type[type].append(piece)
 
         return piece
 
@@ -114,7 +118,7 @@ class Board(DefaultRepr):
         piece = self.squares[y][x]
         self.squares[y][x].set_piece(None)
 
-        self.pieces[piece.type].remove(piece)
+        self.piece_by_type[piece.type].remove(piece)
 
         return piece
 
