@@ -1,6 +1,8 @@
 from typing import List, Union
 from enum import Enum
 
+from helper_funcs import get_checker_pattern
+
 
 class PieceType(Enum):
     Black = 0
@@ -118,18 +120,9 @@ class Board(DefaultRepr):
 
     def init_default_state(self):
         def fill_squares(init_offset, init_row, piece_type):
-            offset = init_offset
-            for piece_y in range(4):
-                for piece_x in range(5):
-                    y = piece_y + init_row
-                    x = piece_x * 2 + offset
+            for (col, row) in get_checker_pattern(init_offset, init_row, 4, 10):
+                self.add_piece(self.squares[col][row], piece_type)
 
-                    self.add_piece(self.squares[y][x], piece_type)
-
-                if offset == 0:
-                    offset = 1
-                else:
-                    offset = 0
         fill_squares(0, 0, PieceType.White)
         fill_squares(1, 6, PieceType.Black)
 
